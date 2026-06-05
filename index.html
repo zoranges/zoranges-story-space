@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZOranges | Personal Space</title>
+    <meta name="theme-color" content="#FFFDF0" />
+    <meta
+      name="description"
+      content="ZOranges personal space with an immersive 3D opening and poetic paper pages."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <script type="module" crossorigin src="/assets/index-DT8HkHqw.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-Jn5wZXSB.css" />
+    <link rel="stylesheet" href="/intro-page.css?v=29" />
+    <script type="module" src="/intro-page.js?v=29"></script>
+  </head>
+
+  <body>
+    <svg class="story-filter-defs" aria-hidden="true" focusable="false">
+      <filter id="liquid-reveal">
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.018"
+          numOctaves="2"
+          seed="11"
+          result="noise"
+        />
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" />
+      </filter>
+    </svg>
+
+    <div id="root"></div>
+
+    <div class="story-pages" aria-live="polite">
+      <section class="story-page" id="life" data-page="0" aria-labelledby="life-title">
+        <div class="story-paper">
+          <p class="story-kicker">photographs and weather</p>
+          <h1 id="life-title">Life Fragments</h1>
+          <div class="gallery-grid">
+            <figure>
+              <img src="/images/intro-pic.webp" alt="纸页风格的生活照片" />
+              <figcaption>把傍晚收进一页纸里。</figcaption>
+            </figure>
+            <article>
+              <h2>生活记录</h2>
+              <p>
+                这一页可以放照片、旅行、日常片段，也可以写某一天突然想到的话。它不必完整，只要真实。
+              </p>
+              <p>后续你可以把图片替换成自己的照片，再补充每张照片背后的感受。</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="story-page" id="notes" data-page="0" aria-labelledby="notes-title">
+        <div class="story-paper">
+          <p class="story-kicker">study notes</p>
+          <h1 id="notes-title">Learning Notes</h1>
+          <div class="note-grid">
+            <article>
+              <time>today</time>
+              <h2>先理解问题</h2>
+              <p>读论文或写代码之前，先问它想解决什么。方向清楚以后，细节才会变得温顺。</p>
+            </article>
+            <article>
+              <time>method</time>
+              <h2>把知识讲出来</h2>
+              <p>如果能用自己的话说清楚一个概念，它就开始从资料变成你的东西。</p>
+            </article>
+            <article>
+              <time>review</time>
+              <h2>留下复盘</h2>
+              <p>每天写一点学习复盘，不追求漂亮，只追求下一次能更快回到状态。</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="story-page" id="stories" data-page="1" aria-labelledby="stories-title">
+        <div class="story-paper">
+          <p class="story-kicker">short fiction</p>
+          <h1 id="stories-title">Story Collection</h1>
+          <div class="anthology-layout">
+            <div class="story-browser">
+              <div class="category-tabs" id="category-tabs" aria-label="小说分类"></div>
+              <div class="story-preview-list" id="story-list"></div>
+            </div>
+
+            <aside class="ranking-panel">
+              <div class="library-head">
+                <h2>热度排行</h2>
+                <button type="button" id="clear-stories">clear mine</button>
+              </div>
+              <ol class="ranking-list" id="ranking-list"></ol>
+            </aside>
+
+            <form class="story-form" id="story-form">
+              <h2>添加作品</h2>
+              <label>
+                标题
+                <input name="title" type="text" placeholder="例如：雨夜来信" required />
+              </label>
+              <label>
+                概述
+                <textarea
+                  name="summary"
+                  rows="3"
+                  placeholder="用几句话概括故事的主题、氛围或开端。预览界面只显示概述。"
+                  required
+                ></textarea>
+              </label>
+              <label>
+                <span>分类</span>
+                <select name="category">
+                  <option value="幻想">幻想</option>
+                  <option value="现实">现实</option>
+                  <option value="悬疑">悬疑</option>
+                  <option value="散文式">散文式</option>
+                </select>
+              </label>
+              <label>
+                上传短篇
+                <input name="file" type="file" accept=".txt,.md,text/plain,text/markdown" />
+              </label>
+              <label class="wide">
+                正文
+                <textarea
+                  name="body"
+                  rows="7"
+                  placeholder="可以直接粘贴你的短篇小说，也可以先上传 .txt / .md 文件。"
+                  required
+                ></textarea>
+              </label>
+              <button type="submit">press into the collection</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="reader-view" id="reader-view" aria-hidden="true" aria-labelledby="reader-title">
+        <article class="reader-paper">
+          <button class="reader-close" type="button" id="reader-close">close</button>
+          <p class="story-kicker" id="reader-meta">short fiction</p>
+          <h1 id="reader-title"></h1>
+          <div class="reader-stats" id="reader-stats"></div>
+          <div class="reader-book" id="reader-book"></div>
+          <div class="reader-controls">
+            <button type="button" id="reader-prev">previous page</button>
+            <span id="reader-page-count">1 / 1</span>
+            <button type="button" id="reader-next">next page</button>
+          </div>
+        </article>
+      </section>
+
+      <section class="story-page" id="contact" data-page="0" aria-labelledby="contact-title">
+        <div class="story-paper">
+          <p class="story-kicker">last page</p>
+          <h1 id="contact-title">Keep in Touch</h1>
+          <div class="story-prose narrow">
+            <p>这里可以放你的邮箱、GitHub、作品链接，或者一句给来访者的短句。</p>
+            <p>
+              整个站点现在有了可继续扩展的节奏：3D 起始页，然后一页一页翻开你的生活、学习、短文和作品。
+            </p>
+          </div>
+          <a class="story-back" href="#" data-back-to-3d>return to the 3D page</a>
+        </div>
+      </section>
+    </div>
+
+    <div class="intro-cue" aria-hidden="true">continue downward</div>
+    <div class="page-indicator" aria-hidden="true"></div>
+  </body>
+</html>
