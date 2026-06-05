@@ -199,8 +199,9 @@ let pageTurnLocked = false;
 let readerPages = [];
 let readerPageIndex = 0;
 let readerTurning = false;
+let readerQueuedTurn = null;
 let readerCurrentStory = null;
-const READER_TURN_DURATION = 980;
+const READER_TURN_FALLBACK = 900;
 
 function findScrollLayer() {
   const candidates = [...document.querySelectorAll("body *")].filter((element) => {
@@ -558,6 +559,7 @@ function closeReader() {
   reader?.setAttribute("aria-hidden", "true");
   document.body.classList.remove("reader-open");
   readerTurning = false;
+  readerQueuedTurn = null;
   readerCurrentStory = null;
 }
 
@@ -676,7 +678,10 @@ function renderReaderPage(direction = "none", fromIndex = readerPageIndex) {
 }
 
 function turnReaderPage(direction) {
-  if (readerTurning) return;
+  if (readerTurning) {
+    readerQueuedTurn = direction;
+    return;
+  }
   const fromIndex = readerPageIndex;
 
   if (direction === "next" && readerPageIndex < readerPages.length) {
@@ -690,10 +695,20 @@ function turnReaderPage(direction) {
   readerTurning = true;
   renderReaderPage(direction, fromIndex);
 
-  window.setTimeout(() => {
+  const turnSheet = document.querySelector(".reader-turn");
+  let settled = false;
+  const settleTurn = () => {
+    if (settled) return;
+    settled = true;
     readerTurning = false;
     renderReaderPage();
-  }, READER_TURN_DURATION);
+    const queuedTurn = readerQueuedTurn;
+    readerQueuedTurn = null;
+    if (queuedTurn) window.requestAnimationFrame(() => turnReaderPage(queuedTurn));
+  };
+
+  turnSheet?.addEventListener("animationend", settleTurn, { once: true });
+  window.setTimeout(settleTurn, READER_TURN_FALLBACK);
 }
 
 function setupStoryCollection() {

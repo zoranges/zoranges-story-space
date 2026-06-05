@@ -784,8 +784,8 @@ body.reader-open .reader-paper {
   pointer-events: none;
   transform-style: preserve-3d;
   transform-origin: left center;
-  animation-duration: 0.96s;
-  animation-timing-function: cubic-bezier(0.18, 0.82, 0.22, 1);
+  animation-duration: 0.86s;
+  animation-timing-function: cubic-bezier(0.38, 0, 0.2, 1);
   animation-fill-mode: both;
   will-change: transform;
 }
@@ -939,8 +939,12 @@ body.reader-open .reader-paper {
     transform: rotateY(0deg);
   }
 
-  42% {
-    transform: rotateY(-82deg);
+  45% {
+    transform: rotateY(-88deg);
+  }
+
+  70% {
+    transform: rotateY(-136deg);
   }
 
   100% {
@@ -953,8 +957,12 @@ body.reader-open .reader-paper {
     transform: rotateY(0deg);
   }
 
-  42% {
-    transform: rotateY(82deg);
+  45% {
+    transform: rotateY(88deg);
+  }
+
+  70% {
+    transform: rotateY(136deg);
   }
 
   100% {
