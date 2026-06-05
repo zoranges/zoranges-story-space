@@ -620,7 +620,7 @@ function buildReaderPage(pageIndex, className = "reader-page") {
 function buildTurnSheet(pageIndex, direction) {
   const turn = document.createElement("div");
   const frontIndex = direction === "next" ? pageIndex : pageIndex - 1;
-  const backIndex = direction === "next" ? pageIndex + 1 : pageIndex;
+  const backIndex = direction === "next" ? pageIndex + 1 : pageIndex - 2;
   const front = buildReaderPage(frontIndex, "reader-turn-face reader-turn-front");
   const back = buildReaderPage(backIndex, "reader-turn-face reader-turn-back");
 
@@ -635,9 +635,12 @@ function updateReaderControls() {
   const next = document.querySelector("#reader-next");
   if (!count || !prev || !next) return;
 
-  count.textContent = `${readerPageIndex + 1} / ${readerPages.length}`;
+  const visiblePages = [readerPageIndex - 1, readerPageIndex]
+    .filter((page) => page >= 0 && page < readerPages.length)
+    .map((page) => page + 1);
+  count.textContent = `${visiblePages.join(" - ") || readerPages.length} / ${readerPages.length}`;
   prev.disabled = readerTurning || readerPageIndex === 0;
-  next.disabled = readerTurning || readerPageIndex === readerPages.length - 1;
+  next.disabled = readerTurning || readerPageIndex >= readerPages.length;
 }
 
 function renderReaderPage(direction = "none", fromIndex = readerPageIndex) {
@@ -674,10 +677,10 @@ function turnReaderPage(direction) {
   if (readerTurning) return;
   const fromIndex = readerPageIndex;
 
-  if (direction === "next" && readerPageIndex < readerPages.length - 1) {
-    readerPageIndex += 1;
+  if (direction === "next" && readerPageIndex < readerPages.length) {
+    readerPageIndex += 2;
   } else if (direction === "prev" && readerPageIndex > 0) {
-    readerPageIndex -= 1;
+    readerPageIndex = Math.max(0, readerPageIndex - 2);
   } else {
     return;
   }
