@@ -194,7 +194,7 @@ const DEFAULT_STORIES = [
 let activeCategory = "全部";
 let scrollLayer = null;
 let lastSwitchAt = 0;
-let currentPage = 0;
+let currentPage = -1;
 let pageTurnLocked = false;
 let readerPages = [];
 let readerPageIndex = 0;
@@ -223,13 +223,20 @@ function isThreeDAtEnd() {
   return layer.scrollTop + layer.clientHeight >= layer.scrollHeight - 12;
 }
 
-function setPage(page) {
-  currentPage = Math.max(0, Math.min(TOTAL_PAGES, page));
-  document.body.classList.remove("page-rippling");
+function isThreeDAtStart() {
+  const layer = scrollLayer || findScrollLayer();
+  if (!layer) return true;
+  return layer.scrollTop <= 12;
+}
 
-  if (currentPage === 0) {
+function setPage(page) {
+  currentPage = Math.max(-1, Math.min(TOTAL_PAGES, page));
+  document.body.classList.remove("page-rippling");
+  document.body.classList.toggle("opening-active", currentPage === -1);
+
+  if (currentPage <= 0) {
     document.body.removeAttribute("data-story-page");
-    history.replaceState(null, "", location.pathname);
+    history.replaceState(null, "", currentPage === -1 ? "#opening" : location.pathname);
   } else {
     document.body.dataset.storyPage = String(currentPage);
     const active = document.querySelector(`.story-page[data-page="${currentPage}"]`);
@@ -256,12 +263,13 @@ function canSwitch() {
 }
 
 function activePaper() {
-  if (currentPage === 0) return null;
+  if (currentPage <= 0) return null;
   return document.querySelector(`.story-page[data-page="${currentPage}"] .story-paper`);
 }
 
 function syncCue() {
   document.body.classList.toggle("ready-for-story", currentPage === 0 && isThreeDAtEnd());
+  document.body.classList.toggle("ready-for-3d", currentPage === -1);
 }
 
 function buildIndicator() {
@@ -284,6 +292,11 @@ function syncIndicator() {
 }
 
 function goNext() {
+  if (currentPage === -1) {
+    setPage(0);
+    return;
+  }
+
   if (currentPage === 0) {
     if (!isThreeDAtEnd()) return;
     setPage(1);
@@ -294,7 +307,11 @@ function goNext() {
 }
 
 function goPrevious() {
-  if (currentPage === 0) return;
+  if (currentPage === -1) return;
+  if (currentPage === 0) {
+    if (isThreeDAtStart()) setPage(-1);
+    return;
+  }
 
   setPage(currentPage - 1);
 }
@@ -391,8 +408,14 @@ window.addEventListener("load", () => {
   window.setInterval(syncCue, 350);
 
   if (location.hash) {
+    if (location.hash === "#opening") {
+      setPage(-1);
+      return;
+    }
     const hashPage = document.querySelector(`.story-page${location.hash}`)?.dataset.page;
     if (hashPage) setPage(Number(hashPage));
+  } else {
+    setPage(-1);
   }
 });
 
