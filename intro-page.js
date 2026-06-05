@@ -546,12 +546,12 @@ function openReader(story) {
     <span>${Math.max(1, Math.ceil(story.body.length / 450))} min read</span>
   `;
 
+  reader.setAttribute("aria-hidden", "false");
+  document.body.classList.add("reader-open");
+
   readerPages = paginateStory(story.body);
   readerPageIndex = 0;
   renderReaderPage();
-
-  reader.setAttribute("aria-hidden", "false");
-  document.body.classList.add("reader-open");
 }
 
 function closeReader() {
@@ -568,16 +568,49 @@ function paginateStory(text) {
     .split(/\n+/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean);
-  const compactScreen = window.matchMedia("(max-width: 760px)").matches;
-  const maxChars = compactScreen ? 650 : 1100;
-  const maxParagraphs = compactScreen ? 5 : 8;
+  const book = document.querySelector("#reader-book");
+  if (!book || !book.clientHeight) return fallbackPaginateStory(paragraphs);
+
+  const measurer = document.createElement("div");
+  measurer.className = "reader-page reader-page-right reader-measure-page";
+  book.append(measurer);
+
+  const pages = [];
+  let page = [];
+
+  const fits = (candidate) => {
+    measurer.replaceChildren(buildReaderHeader("000 / 000"), ...paragraphNodes(candidate));
+    return measurer.scrollHeight <= measurer.clientHeight + 3;
+  };
+
+  paragraphs.forEach((paragraph) => {
+    const nextPage = [...page, paragraph];
+    if (page.length > 0 && !fits(nextPage)) {
+      pages.push(page);
+      page = [paragraph];
+      if (!fits(page)) {
+        const splitPages = splitLongParagraph(paragraph, fits);
+        page = splitPages.pop() || [];
+        pages.push(...splitPages);
+      }
+    } else {
+      page = nextPage;
+    }
+  });
+
+  measurer.remove();
+  if (page.length) pages.push(page);
+  return pages.length ? pages : [[""]];
+}
+
+function fallbackPaginateStory(paragraphs) {
+  const maxChars = window.matchMedia("(max-width: 760px)").matches ? 900 : 1500;
   const pages = [];
   let page = [];
   let length = 0;
 
   paragraphs.forEach((paragraph) => {
-    const nextLength = length + paragraph.length;
-    if (page.length > 0 && (nextLength > maxChars || page.length >= maxParagraphs)) {
+    if (page.length > 0 && length + paragraph.length > maxChars) {
       pages.push(page);
       page = [];
       length = 0;
@@ -590,12 +623,35 @@ function paginateStory(text) {
   return pages.length ? pages : [[""]];
 }
 
-function readerTextNodes(pageIndex) {
-  return (readerPages[pageIndex] || [""]).map((paragraph) => {
+function splitLongParagraph(paragraph, fits) {
+  const chunks = paragraph.match(/[^。！？!?；;]+[。！？!?；;]?|.+$/g) || [paragraph];
+  const pages = [];
+  let page = [];
+
+  chunks.forEach((chunk) => {
+    const candidateText = [...page, chunk].join("");
+    if (page.length > 0 && !fits([candidateText])) {
+      pages.push([page.join("")]);
+      page = [chunk];
+    } else {
+      page.push(chunk);
+    }
+  });
+
+  if (page.length) pages.push([page.join("")]);
+  return pages;
+}
+
+function paragraphNodes(paragraphs) {
+  return paragraphs.map((paragraph) => {
     const node = document.createElement("p");
     node.textContent = paragraph;
     return node;
   });
+}
+
+function readerTextNodes(pageIndex) {
+  return paragraphNodes(readerPages[pageIndex] || [""]);
 }
 
 function readerPageLabel(pageIndex) {
@@ -605,18 +661,23 @@ function buildReaderPage(pageIndex, className = "reader-page") {
   const page = document.createElement("div");
   page.className = className;
   if (pageIndex >= 0 && pageIndex < readerPages.length) {
-    const header = document.createElement("header");
-    const title = document.createElement("span");
-    const number = document.createElement("span");
-
-    header.className = "reader-page-header";
-    title.textContent = readerCurrentStory?.title || "";
-    number.textContent = `${pageIndex + 1} / ${readerPages.length}`;
-    header.append(title, number);
+    const header = buildReaderHeader(`${pageIndex + 1} / ${readerPages.length}`);
 
     page.replaceChildren(header, ...readerTextNodes(pageIndex));
   }
   return page;
+}
+
+function buildReaderHeader(numberText) {
+  const header = document.createElement("header");
+  const title = document.createElement("span");
+  const number = document.createElement("span");
+
+  header.className = "reader-page-header";
+  title.textContent = readerCurrentStory?.title || "";
+  number.textContent = numberText;
+  header.append(title, number);
+  return header;
 }
 
 function buildTurnSheet(pageIndex, direction) {

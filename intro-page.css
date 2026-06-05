@@ -747,6 +747,12 @@ body.reader-open .reader-paper {
     inset 0 0 26px rgba(92, 69, 52, 0.05);
 }
 
+.reader-measure-page {
+  visibility: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+
 .reader-spine {
   position: absolute;
   top: 0;
