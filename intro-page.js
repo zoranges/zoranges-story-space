@@ -659,11 +659,13 @@ function renderReaderPage(direction = "none", fromIndex = readerPageIndex) {
     book.children[2].className = "reader-book-shadow";
   } else {
     book.classList.add("is-turning");
+    const leftIndex = direction === "next" ? fromIndex - 1 : readerPageIndex - 1;
+    const rightIndex = direction === "next" ? readerPageIndex : fromIndex;
     book.replaceChildren(
       document.createElement("div"),
-      buildReaderPage(readerPageIndex - 1, "reader-page reader-page-left"),
+      buildReaderPage(leftIndex, "reader-page reader-page-left"),
       document.createElement("div"),
-      buildReaderPage(readerPageIndex, "reader-page reader-page-right reader-page-under"),
+      buildReaderPage(rightIndex, "reader-page reader-page-right reader-page-under"),
       buildTurnSheet(fromIndex, direction)
     );
     book.firstElementChild.className = "reader-spine";
